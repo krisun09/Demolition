@@ -3,27 +3,20 @@ package demolition;
 import processing.core.PApplet;
 import processing.core.PImage;
 
+import static demolition.GameMap.CELL_SIZE;
+
 abstract class Character {
     int x;
     int y;
-    int life;
-
-    // TODO: limit the characters within the frame
-    int ground = 10;
-    int ceiling = 470;
-
-    int yVel;
-    int xVel;
-
+    Direction direction;
     PImage sprite;
 
     public void drawChar(PApplet app){
-        if (this.life > 0) {
-            app.image(this.sprite, this.x, this.y); // TODO: replace with left facing image of the player
-        }
+        // TODO: replace with left facing image of the player
+        app.image(sprite, x * CELL_SIZE, y * CELL_SIZE * 0.93F);
     }
 
-    public abstract String[] moveX(String[] map, int direction);
+    public abstract void moveX(String[] map, int direction);
 
     public abstract void moveY(int speed);
 

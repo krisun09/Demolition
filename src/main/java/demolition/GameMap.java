@@ -21,13 +21,13 @@
      private Player mario;
      private List<Enemy> enemyList = new ArrayList<>();
 
-     // update the x and y of mario
      // then update the map2
 
      public GameMap(Level level, int lives, PApplet applet) {
         this.time = level.getTime();
         this.lives = lives;
         this.map = applet.loadStrings(level.getPath());
+        initCharacters(applet);
      }
 
      public void tick(PApplet pApplet) {
@@ -36,11 +36,8 @@
          if (ticks == 0) {
              decreaseTime();
              moveEnemies();
-             // call enemy movement etc etc
-
              ticks = App.FPS;
          }
-
          //redraw the refresh status
          drawMap(pApplet);
      }
@@ -78,25 +75,30 @@
              }
          }
 
-         for (int i = 0; i < map.length; i++) {
-             String[] rowArr = map[i].split("");
-             for (int j = 0; j < rowArr.length; j++) {
-                 switch (rowArr[j]) {
-                     case "P":
-                         Player.draw(pApplet, j * CELL_SIZE, (i+2) * CELL_SIZE * 0.93F);
-                         break;
-                     case "R":
-                         RedEnemy.draw(pApplet, j * CELL_SIZE , (i+2) * CELL_SIZE * 0.93F);
-                         enemyList.add(new RedEnemy(i, j, pApplet.loadImage("src/main/resources/red_enemy/red_down1.png")));
-                         break;
-                     case "Y":
-                         YellowEnemy.draw(pApplet, j * CELL_SIZE, (i+2) * CELL_SIZE * 0.93F);
-                         break;
-                     default:
-                         break;
-                 }
-             }
-         }
+         mario.drawChar(pApplet);
+         enemyList.forEach(enemy -> enemy.drawChar(pApplet));
+
+    }
+
+    private void initCharacters(PApplet pApplet) {
+        for (int i = 0; i < map.length; i++) {
+            String[] rowArr = map[i].split("");
+            for (int j = 0; j < rowArr.length; j++) {
+                switch (rowArr[j]) {
+                    case "P":
+                        mario = new Player(j, i + 2, pApplet);
+                        break;
+                    case "R":
+                        enemyList.add(new RedEnemy(j, i + 2, pApplet));
+                        break;
+                    case "Y":
+                        enemyList.add(new YellowEnemy(j, i + 2, pApplet));
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
     }
 
      private void decreaseTime() {
@@ -104,13 +106,7 @@
      }
 
      private void moveEnemies() {
-
-//         enemyList.forEach(enemy -> enemy.moveX(map, 1));
-
-         for (int i = 0; i < enemyList.size(); i+=60) {
-             enemyList.get(i).moveX(map, 1);
-         }
-
+        enemyList.forEach(enemy -> enemy.move(map));
      }
 
  }
