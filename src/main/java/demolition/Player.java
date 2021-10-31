@@ -13,33 +13,80 @@ class Player extends Character {
         this.sprite = pApplet.loadImage(SPRITE_PATH);
     }
 
-    public void collision() {
-    }
-
-    public void keyPressed() {
-        /*if (key == CODED){
-            if (keyCode == UP){
-                System.out.println("UP pressed");
-                this.bombMan.moveY(-6);
-            }
-            if (keyCode == DOWN){
-                System.out.println("DOWN pressed");
-                this.bombMan.moveY(6);
-            }
-            if (keyCode == LEFT){
-                System.out.println("LEFT pressed");
-                this.bombMan.moveX(-6);
-            }
-            if (keyCode == RIGHT){
-                System.out.println("RIGHT pressed");
-                this.bombMan.moveX(6);
-            }
-        }*/
-    }
-
-    public static void draw(PApplet pApplet, float x, float y) {
+    public static void draw (PApplet pApplet,float x, float y){
         PImage sprite = pApplet.loadImage(SPRITE_PATH);
         pApplet.image(sprite, x, y);
     }
 
+    public void collision() {
+    }
+
+    public void keyReleased(PApplet pApplet, String[] map) {
+
+        if (pApplet.keyCode == pApplet.UP){
+            System.out.println("UP pressed");
+            takeMove(Direction.Up, map);
+        }
+        else if (pApplet.keyCode == pApplet.DOWN){
+            System.out.println("DOWN pressed");
+            takeMove(Direction.Down, map);
+        }
+        else if (pApplet.keyCode == pApplet.LEFT){
+            System.out.println("LEFT pressed");
+            takeMove(Direction.Left, map);
+        }
+        else if (pApplet.keyCode == pApplet.RIGHT){
+            System.out.println("RIGHT pressed");
+            takeMove(Direction.Right, map);
+        }
+
+    }
+
+    public void takeMove(Direction direction, String[] map) {
+
+        switch (direction) {
+            case Right:
+                char nextCell = map[y-2].charAt(x+1);
+                if (nextCell == ' ' || nextCell == 'Y' || nextCell == 'P' || nextCell == 'R') {
+                    x += 1;
+                }
+                else {
+                    System.out.println("cant go " + direction.name());
+                }
+                break;
+            case Up:
+                nextCell = map[y-3].charAt(x);
+                if (nextCell == ' ' || nextCell == 'Y' || nextCell == 'P' || nextCell == 'R') {
+                    y--;
+                }
+                else {
+                    System.out.println("cant go " + direction.name());
+                }
+                break;
+            case Left:
+                nextCell = map[y-2].charAt(x-1);
+                if (nextCell == ' ' || nextCell == 'Y' || nextCell == 'P' || nextCell == 'R') {
+                    x--;
+                }
+                else {
+                    System.out.println("cant go " + direction.name());
+                }
+                break;
+            case Down:
+                nextCell = map[y-1].charAt(x);
+                if (nextCell == ' ' || nextCell == 'Y' || nextCell == 'P' || nextCell == 'R') {
+                    y++;
+                }
+                else {
+                    System.out.println("cant go " + direction.name());
+                }
+                break;
+
+        }
+
+
+    }
+
+
 }
+

@@ -25,8 +25,6 @@
      private Player mario;
      private List<Enemy> enemyList = new ArrayList<>();
 
-     // then update the map2
-
      public GameMap(Level level, int lives, PApplet applet) {
         this.time = level.getTime();
         this.lives = lives;
@@ -110,6 +108,11 @@
 
      private void moveEnemies() {
         enemyList.forEach(enemy -> enemy.move(map));
+     }
+
+     public void movePlayer(PApplet pApplet) {
+         mario.keyReleased(pApplet, map);
+
      }
  }
 

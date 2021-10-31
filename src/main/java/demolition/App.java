@@ -25,6 +25,12 @@ public class App extends PApplet {
         gameMap.tick(this);
     }
 
+    public void keyReleased() {
+        if (this.key == CODED){
+            gameMap.movePlayer(this);
+        }
+    }
+
     public static void main(String[] args) {
         PApplet.main("demolition.App");
     }

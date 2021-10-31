@@ -1,7 +1,5 @@
 package demolition;
 
-import java.util.Objects;
-
 abstract class Enemy extends Character {
 
     public Enemy (int x, int y) {
