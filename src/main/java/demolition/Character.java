@@ -11,14 +11,10 @@ abstract class Character {
     Direction direction;
     PImage sprite;
 
-    public void drawChar(PApplet app){
+    public void drawChar(PApplet app) {
         // TODO: replace with left facing image of the player
         app.image(sprite, x * CELL_SIZE, y * CELL_SIZE * 0.93F);
     }
-
-    public abstract void moveX(String[] map, int direction);
-
-    public abstract void moveY(int speed);
 
 }
 

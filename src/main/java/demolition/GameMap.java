@@ -7,12 +7,16 @@
  import java.util.ArrayList;
  import java.util.List;
 
- // Maps are 13 rows tall, and 15 columns wide, with a 64 pixel offset between the top of the screen and the start of the first row.
- // Each grid space is 32x32 pixels.
- // There are 4 different tile types within the map: solid, broken, empty and goal
- // Map files store the maps as multidimensional character arrays, where each character represents what is in that cell
- // A map is valid if it has a bounding border, a starting location for Bomb Guy, and a Goal Tile
  public class GameMap {
+
+     /**
+      *   Maps are with a 64 pixel offset between the top of the screen and the start of the first row.
+      *   Each grid space is 32x32 pixels.
+      *   There are 4 different tile types within the map: solid, broken, empty and goal
+      *   Map files store the maps as multidimensional character arrays, where each character represents what is in that cell
+      *   A map is valid if it has a bounding border, a starting location for Bomb Guy, and a Goal Tile
+      */
+
      public static final int CELL_SIZE = 32;
      private int lives;
      private int time;
@@ -77,7 +81,6 @@
 
          mario.drawChar(pApplet);
          enemyList.forEach(enemy -> enemy.drawChar(pApplet));
-
     }
 
     private void initCharacters(PApplet pApplet) {
@@ -108,7 +111,6 @@
      private void moveEnemies() {
         enemyList.forEach(enemy -> enemy.move(map));
      }
-
  }
 
 

@@ -1,9 +1,6 @@
 package demolition;
 
 import processing.core.PApplet;
-import processing.core.PImage;
-
-import java.util.Random;
 
 class YellowEnemy extends Enemy {
 
