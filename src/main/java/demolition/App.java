@@ -22,6 +22,11 @@ public class App extends PApplet {
     }
 
     public void draw() {
+
+        /**
+         * draws the basic game map: tiles, time, lives
+         */
+
         gameMap.tick(this);
     }
 

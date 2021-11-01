@@ -1,7 +1,8 @@
 package demolition;
 
 import processing.core.PApplet;
-import processing.core.PImage;
+
+import java.util.List;
 
 class Player extends Character {
 
@@ -11,38 +12,43 @@ class Player extends Character {
         this.x = x;
         this.y = y;
         this.sprite = pApplet.loadImage(SPRITE_PATH);
+        this.direction = Direction.Down;
     }
 
-    public static void draw (PApplet pApplet,float x, float y){
-        PImage sprite = pApplet.loadImage(SPRITE_PATH);
-        pApplet.image(sprite, x, y);
-    }
-
-    public void collision() {
+    public void checkCollision(List<Enemy> enemyList, int x, int y) {
+        for (Enemy enemy : enemyList) {
+            if (x == enemy.x && y == enemy.y) {
+                // life -= 1
+            }
+        }
     }
 
     public void keyReleased(PApplet pApplet, String[] map) {
 
         if (pApplet.keyCode == pApplet.UP){
             System.out.println("UP pressed");
-            takeMove(Direction.Up, map);
+            this.direction = Direction.Up;
+            takeMove(map);
         }
         else if (pApplet.keyCode == pApplet.DOWN){
             System.out.println("DOWN pressed");
-            takeMove(Direction.Down, map);
+            this.direction = Direction.Down;
+            takeMove(map);
         }
         else if (pApplet.keyCode == pApplet.LEFT){
             System.out.println("LEFT pressed");
-            takeMove(Direction.Left, map);
+            this.direction = Direction.Left;
+            takeMove(map);
         }
         else if (pApplet.keyCode == pApplet.RIGHT){
             System.out.println("RIGHT pressed");
-            takeMove(Direction.Right, map);
+            this.direction = Direction.Right;
+            takeMove(map);
         }
 
     }
 
-    public void takeMove(Direction direction, String[] map) {
+    public void takeMove(String[] map) {
 
         switch (direction) {
             case Right:
@@ -81,10 +87,29 @@ class Player extends Character {
                     System.out.println("cant go " + direction.name());
                 }
                 break;
-
         }
+    }
 
-
+    @Override
+    public void changeSprite(PApplet pApplet) {
+        switch (direction) {
+            case Down:
+                spritePath = "src/main/resources/player/player" + spriteNum + ".png";
+                sprite = pApplet.loadImage( "src/main/resources/player/player" + spriteNum + ".png");
+                break;
+            case Up:
+                spritePath = "src/main/resources/player/player_up" + spriteNum + ".png";
+                sprite = pApplet.loadImage( "src/main/resources/player/player_up" + spriteNum + ".png");
+                break;
+            case Left:
+                spritePath = "src/main/resources/player/player_left" + spriteNum + ".png";
+                sprite = pApplet.loadImage( "src/main/resources/player/player_left" + spriteNum + ".png");
+                break;
+            case Right:
+                spritePath = "src/main/resources/player/player_right" + spriteNum + ".png";
+                sprite = pApplet.loadImage( "src/main/resources/player/player_right" + spriteNum + ".png");
+                break;
+        }
     }
 
 

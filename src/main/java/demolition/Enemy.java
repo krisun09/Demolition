@@ -1,5 +1,7 @@
 package demolition;
 
+import processing.core.PApplet;
+
 abstract class Enemy extends Character {
 
     public Enemy (int x, int y) {
@@ -63,5 +65,9 @@ abstract class Enemy extends Character {
     }
 
     public abstract Direction takeTurn(Direction direction);
+
+    @Override
+    public void changeSprite(PApplet pApplet) {
+    }
 
 }
