@@ -3,8 +3,6 @@ package demolition;
 import processing.core.PApplet;
 import processing.core.PImage;
 
-import java.util.List;
-
 import static demolition.GameMap.CELL_SIZE;
 
 abstract class Character {
@@ -12,7 +10,6 @@ abstract class Character {
     int y;
     Direction direction;
     PImage sprite;
-    String spritePath;
     int ticks = 12;
     int spriteNum = 1;
 
@@ -31,6 +28,21 @@ abstract class Character {
         pApplet.image(sprite, x * CELL_SIZE, y * CELL_SIZE * 0.93F);
     }
 
+    public int getX() {
+        return x;
+    }
+
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public void setY(int y) {
+        this.y = y;
+    }
 }
 
 

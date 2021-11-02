@@ -14,6 +14,24 @@ class YellowEnemy extends Enemy {
     }
 
     @Override
+    public void changeSprite(PApplet pApplet) {
+        switch (direction) {
+            case Down:
+                sprite = pApplet.loadImage("src/main/resources/yellow_enemy/yellow_down" + spriteNum + ".png");
+                break;
+            case Up:
+                sprite = pApplet.loadImage("src/main/resources/yellow_enemy/yellow_up" + spriteNum + ".png");
+                break;
+            case Left:
+                sprite = pApplet.loadImage("src/main/resources/yellow_enemy/yellow_left" + spriteNum + ".png");
+                break;
+            case Right:
+                sprite = pApplet.loadImage("src/main/resources/yellow_enemy/yellow_right" + spriteNum + ".png");
+                break;
+        }
+    }
+
+    @Override
     public Direction takeTurn(Direction direction) {
         int order = (direction.ordinal() + 1) % 4;
         return Direction.values()[order];

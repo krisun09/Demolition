@@ -21,18 +21,41 @@
      private int lives;
      private int time;
      private int ticks = App.FPS;
-     private String[] map;
+     private char[][] map;
      private Player mario;
-     private List<Enemy> enemyList = new ArrayList<>();
+     private List<Enemy> enemyList;
+     private App pApplet;
+     private List<Bomb> bombs;
+     private List<Explosion> explosions;
+     private int levelNumber;
 
-     public GameMap(Level level, int lives, PApplet applet) {
-        this.time = level.getTime();
-        this.lives = lives;
-        this.map = applet.loadStrings(level.getPath());
-        initCharacters(applet);
+     public GameMap(Level level, int lives, App applet) {
+         this.pApplet = applet;
+         this.levelNumber = 0;
+         this.time = level.getTime();
+         this.lives = lives;
+         this.map = initLevelMap(level, this.pApplet);
      }
 
-     public void tick(PApplet pApplet) {
+     public char[][] initLevelMap(Level level, PApplet applet) {
+         enemyList = new ArrayList<>();
+         bombs = new ArrayList<>();
+         explosions = new ArrayList<>();
+         char [][] retMap = new char[15][15];
+         retMap[0] = new char[]{' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '};
+         retMap[1] = new char[]{' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '};
+         String[] configMap = applet.loadStrings(level.getPath());
+         for (int i = 0; i < configMap.length; i++) {
+             for (int j = 0; j < configMap[i].length(); j++) {
+                 char val = configMap[i].charAt(j);
+                 retMap[i + 2][j] = val == 'P' || val == 'Y' || val == 'R' ? ' ' : val;
+             }
+         }
+         initCharacters(configMap);
+         return retMap;
+     }
+
+     public void tick() {
          // refresh map etc
          ticks--;
          if (ticks == 0) {
@@ -41,10 +64,23 @@
              ticks = App.FPS;
          }
          //redraw the refresh status
-         drawMap(pApplet);
+         drawMap();
      }
 
-     public void drawMap(PApplet pApplet) {
+     public void drawMap() {
+         if (lives == 0) {
+             String gameOver = "Game Over";
+             pApplet.background(243, 112, 33);
+             PFont gameOverPFont = pApplet.createFont("PressStart2P-Regular.ttf", 26, true, gameOver.toCharArray());
+             pApplet.textFont(gameOverPFont);
+             pApplet.fill(0);
+             pApplet.text(gameOver, Math.floorDiv(App.WIDTH, 4) , Math.floorDiv(App.HEIGHT, 2));
+             pApplet.noLoop();
+             return;
+         }
+
+         checkEnemyCollision();
+
          pApplet.background(243, 112, 33);
          PImage playerImg = pApplet.loadImage("src/main/resources/icons/player.png");
          pApplet.image(playerImg, 4 * CELL_SIZE,CELL_SIZE / 2);
@@ -57,21 +93,21 @@
          pApplet.image(clockImg, 8 * CELL_SIZE,CELL_SIZE / 2);
          pApplet.text(this.time, 9.2F * CELL_SIZE, CELL_SIZE / 2 + clockImg.height - 2);
 
-         for (int i = 0; i < map.length; i++) {
-             String[] rowArr = map[i].split("");
+         for (int i = 2; i < map.length; i++) {
+             char[] rowArr = map[i];
              for (int j = 0; j < rowArr.length; j++) {
                  switch (rowArr[j]) {
-                     case "W":
-                         SolidWall.draw(pApplet, j * CELL_SIZE, (i+2) * CELL_SIZE);
+                     case 'W':
+                         SolidWall.draw(pApplet, j * CELL_SIZE, (i) * CELL_SIZE);
                          break;
-                     case "B":
-                         BrokenWall.draw(pApplet, j * CELL_SIZE, (i+2) * CELL_SIZE);
+                     case 'B':
+                         BrokenWall.draw(pApplet, j * CELL_SIZE, (i) * CELL_SIZE);
                          break;
-                     case "G":
-                         GoalTile.draw(pApplet, j * CELL_SIZE, (i+2) * CELL_SIZE);
+                     case 'G':
+                         GoalTile.draw(pApplet, j * CELL_SIZE, (i) * CELL_SIZE);
                          break;
                      default:
-                         EmptyTile.draw(pApplet, j * CELL_SIZE, (i+2) * CELL_SIZE);
+                         EmptyTile.draw(pApplet, j * CELL_SIZE, (i) * CELL_SIZE);
                          break;
                  }
              }
@@ -79,9 +115,92 @@
 
          mario.drawChar(pApplet);
          enemyList.forEach(enemy -> enemy.drawChar(pApplet));
+
+         bombs.forEach(bomb -> {
+             bomb.tick();
+             if (bomb.getTicks() == 0) {
+                 explodeBomb(bomb);
+             } else {
+                 bomb.draw(pApplet);
+             }
+         });
+         // remove the exploded bombs
+         bombs.removeIf(bomb -> bomb.getTicks() == 0);
+
+         explosions.forEach(explosion -> {
+             explosion.tick();
+             if (explosion.getTicks() > 0) {
+                 explosion.draw(pApplet, map);
+             } else {
+                 this.handleExplosion(explosion);
+             }
+         });
+         // remove the exploded bombs
+         explosions.removeIf(explosion -> explosion.getTicks() == 0);
+     }
+
+     private void handleExplosion(Explosion explosion) {
+         int x = explosion.getX();
+         int y = explosion.getY();
+         // loose life and reset if player caught in explosion
+         if (x-2 <= mario.getX() && mario.getX() <= x+2 && y-2 <= mario.getY() && mario.getY() <= y+2) {
+             lives--;
+             resetLevel();
+             return;
+         }
+
+         // kill enemies if they are caught in the explosion
+         for (Enemy enemy : enemyList) {
+             if (x-2 <= enemy.getX() && enemy.getX() <= x+2 && y-2 <= enemy.getY() && enemy.getY() <= y+2) {
+                 enemy.setKilled(true);
+             }
+         }
+         enemyList.removeIf(enemy -> enemy.isKilled());
+
+         // update the map remove broken tiles caught in the explosion
+         char cellVal = map[y][x - 1];
+         if (cellVal == 'B') {
+             map[y][x - 1] = ' ';
+         } else if (cellVal == ' ') {
+             if (x > 1 && map[y][x - 2] == 'B') {
+                 map[y][x - 2] = ' ';
+             }
+         }
+
+         cellVal = map[y][x + 1];
+         if (cellVal == 'B') {
+             map[y][x + 1] = ' ';
+         } else if (cellVal == ' '){
+             if (map[y][x + 2] == 'B') {
+                 map[y][x + 2] = ' ';
+             }
+         }
+
+         cellVal = map[y-1][x];
+         if (cellVal == 'B') {
+             map[y-1][x] = ' ';
+         } else if (cellVal == ' '){
+             if (y > 3 && map[y - 2][x] == 'B') {
+                 map[y - 2][x] = ' ';
+             }
+         }
+
+         cellVal = map[y+1][x];
+         if (cellVal == 'B') {
+             map[y+1][x] = ' ';
+         } else if (cellVal == ' '){
+             if (map[y + 2][x] == 'B') {
+                 map[y + 2][x] = ' ';
+             }
+         }
+     }
+
+     private void explodeBomb(Bomb bomb) {
+         Explosion explosion = new Explosion(bomb.getX(), bomb.getY(), pApplet);
+         explosions.add(explosion);
     }
 
-    private void initCharacters(PApplet pApplet) {
+     private void initCharacters(String[] map) {
         for (int i = 0; i < map.length; i++) {
             String[] rowArr = map[i].split("");
             for (int j = 0; j < rowArr.length; j++) {
@@ -102,6 +221,43 @@
         }
     }
 
+     private void checkEnemyCollision() {
+         // check collision
+         for (Enemy enemy : enemyList) {
+             if (mario.x == enemy.x && mario.y == enemy.y) {
+                 lives --;
+                 resetLevel();
+                 return;
+             }
+         }
+     }
+
+     private void resetLevel() {
+         Level level = pApplet.getAppConfig().getLevels().get(this.levelNumber);
+         this.map = initLevelMap(level, pApplet);
+         //reset time if needed
+         this.time = level.getTime();
+     }
+
+     public void goToNextLevel() {
+         if (pApplet.getAppConfig().getLevels().size() > this.levelNumber + 1) {
+             this.levelNumber++;
+             Level level = pApplet.getAppConfig().getLevels().get(this.levelNumber);
+             this.map = initLevelMap(level, pApplet);
+             this.time = level.getTime();
+         } else {
+             System.out.println("You win");
+             String youWin = "You win";
+             pApplet.background(243, 112, 33);
+             PFont gameOverPFont = pApplet.createFont("PressStart2P-Regular.ttf", 26, true, youWin.toCharArray());
+             pApplet.textFont(gameOverPFont);
+             pApplet.fill(0);
+             pApplet.text(youWin, Math.floorDiv(App.WIDTH, 4) , Math.floorDiv(App.HEIGHT, 2));
+             pApplet.noLoop();
+             return;
+         }
+     }
+
      private void decreaseTime() {
          time--;
      }
@@ -110,9 +266,13 @@
         enemyList.forEach(enemy -> enemy.move(map));
      }
 
-     public void movePlayer(PApplet pApplet) {
-         mario.keyReleased(pApplet, map);
+     public void movePlayer(Direction direction) {
+         mario.move(map, direction);
+     }
 
+     public void placeBomb() {
+         Bomb bomb = new Bomb(mario.getX(), mario.getY(), pApplet);
+         this.bombs.add(bomb);
      }
  }
 

@@ -17,14 +17,28 @@ class RedEnemy extends Enemy {
     }
 
     @Override
-    public Direction takeTurn(Direction direction){  // random turn
+    public void changeSprite(PApplet pApplet) {
+        switch (direction) {
+            case Down:
+                sprite = pApplet.loadImage("src/main/resources/red_enemy/red_down" + spriteNum + ".png");
+                break;
+            case Up:
+                sprite = pApplet.loadImage("src/main/resources/red_enemy/red_up" + spriteNum + ".png");
+                break;
+            case Left:
+                sprite = pApplet.loadImage("src/main/resources/red_enemy/red_left" + spriteNum + ".png");
+                break;
+            case Right:
+                sprite = pApplet.loadImage("src/main/resources/red_enemy/red_right" + spriteNum + ".png");
+                break;
+        }
+    }
+
+    @Override
+    public Direction takeTurn(Direction direction) {  // random turn
         Random rand = new Random();
         int order = (direction.ordinal() + rand.nextInt(4)) % 4;
         return Direction.values()[order];
     }
 
-    public static void draw(PApplet pApplet, float x, float y) {
-        PImage sprite = pApplet.loadImage("src/main/resources/red_enemy/red_down1.png");
-        pApplet.image(sprite, x, y);
-    }
 }

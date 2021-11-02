@@ -4,17 +4,19 @@ import processing.core.PApplet;
 
 abstract class Enemy extends Character {
 
+    private boolean killed = false;
+
     public Enemy (int x, int y) {
         this.x = x;
         this.y = y;
         this.direction = Direction.Right;
     }
 
-    public void move(String[] map) {
+    public void move(char[][] map) {
         System.out.println("i'm at coordinates x " + x + " y " + y);
         switch (direction) {
             case Right:
-                char nextCell = map[y-2].charAt(x+1);
+                char nextCell = map[y][x+1];
                 if (nextCell == ' ' || nextCell == 'Y' || nextCell == 'P' || nextCell == 'R') {
                     x++;
                 }
@@ -26,7 +28,7 @@ abstract class Enemy extends Character {
                 }
                 break;
             case Up:
-                nextCell = map[y-3].charAt(x);
+                nextCell = map[y-1][x];
                 if (nextCell == ' ' || nextCell == 'Y' || nextCell == 'P' || nextCell == 'R') {
                     y--;
                 }
@@ -38,7 +40,7 @@ abstract class Enemy extends Character {
                 }
                 break;
             case Left:
-                nextCell = map[y-2].charAt(x-1);
+                nextCell = map[y][x-1];
                 if (nextCell == ' ' || nextCell == 'Y' || nextCell == 'P' || nextCell == 'R') {
                     x--;
                 }
@@ -50,7 +52,7 @@ abstract class Enemy extends Character {
                 }
                 break;
             case Down:
-                nextCell = map[y-1].charAt(x);
+                nextCell = map[y+1][x];
                 if (nextCell == ' ' || nextCell == 'Y' || nextCell == 'P' || nextCell == 'R') {
                     y++;
                 }
@@ -67,7 +69,13 @@ abstract class Enemy extends Character {
     public abstract Direction takeTurn(Direction direction);
 
     @Override
-    public void changeSprite(PApplet pApplet) {
+    public abstract void changeSprite(PApplet pApplet);
+
+    public boolean isKilled() {
+        return killed;
     }
 
+    public void setKilled(boolean killed) {
+        this.killed = killed;
+    }
 }
