@@ -23,5 +23,5 @@ public class Level {
 
     public void setTime(int time) {
         this.time = time;
-    } 
+    }
 }

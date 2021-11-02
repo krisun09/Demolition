@@ -12,6 +12,12 @@ abstract class Enemy extends Character {
         this.direction = Direction.Right;
     }
 
+    /**
+     * checks the next tile the enemy is to be moved onto and moves the enemy
+     * if movable: move;
+     * if not movable: take turn (different enemy has different methods of turning)
+     * @param map: char[][] map
+     */
     public void move(char[][] map) {
         System.out.println("i'm at coordinates x " + x + " y " + y);
         switch (direction) {

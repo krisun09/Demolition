@@ -15,6 +15,9 @@ abstract class Character {
 
     public abstract void changeSprite(PApplet pApplet);
 
+    /**
+     * draws the animation of the character
+     */
     public void drawChar(PApplet pApplet) {
         ticks--;
         if (ticks == 0) {

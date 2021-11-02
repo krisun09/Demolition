@@ -49,6 +49,9 @@ public class Bomb {
         spriteTicks--;
     }
 
+    /**
+     * draws the animation for the bomb
+     */
     public void draw(PApplet pApplet) {
         if (spriteTicks == 0) {
             sprite = pApplet.loadImage("src/main/resources/bomb/bomb" + spriteNum + ".png");

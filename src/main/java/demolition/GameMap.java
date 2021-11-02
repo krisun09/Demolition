@@ -139,22 +139,137 @@
          explosions.removeIf(explosion -> explosion.getTicks() == 0);
      }
 
+     private void initCharacters(String[] map) {
+         for (int i = 0; i < map.length; i++) {
+             String[] rowArr = map[i].split("");
+             for (int j = 0; j < rowArr.length; j++) {
+                 switch (rowArr[j]) {
+                     case "P":
+                         mario = new Player(j, i + 2, pApplet);
+                         break;
+                     case "R":
+                         enemyList.add(new RedEnemy(j, i + 2, pApplet));
+                         break;
+                     case "Y":
+                         enemyList.add(new YellowEnemy(j, i + 2, pApplet));
+                         break;
+                     default:
+                         break;
+                 }
+             }
+         }
+     }
+
+     private void checkEnemyCollision() {
+         // check collision
+         for (Enemy enemy : enemyList) {
+             if (mario.x == enemy.x && mario.y == enemy.y) {
+                 lives --;
+                 resetLevel();
+                 return;
+             }
+         }
+     }
+
+     private void resetLevel() {
+         Level level = pApplet.getAppConfig().getLevels().get(this.levelNumber);
+         this.map = initLevelMap(level, pApplet);
+         //reset time if needed
+         this.time = level.getTime();
+     }
+
+     private void decreaseTime() {
+         time--;
+     }
+
+     private void moveEnemies() {
+         enemyList.forEach(enemy -> enemy.move(map));
+     }
+
+     public void movePlayer(Direction direction) {
+         mario.move(map, direction);
+     }
+
+     public void placeBomb() {
+         Bomb bomb = new Bomb(mario.getX(), mario.getY(), pApplet);
+         this.bombs.add(bomb);
+     }
+
+     /**
+      * checks if the explosion killed the player or the enemies
+      */
      private void handleExplosion(Explosion explosion) {
          int x = explosion.getX();
          int y = explosion.getY();
+
          // loose life and reset if player caught in explosion
-         if (x-2 <= mario.getX() && mario.getX() <= x+2 && y-2 <= mario.getY() && mario.getY() <= y+2) {
-             lives--;
-             resetLevel();
-             return;
+         boolean hasWallNearBy = false;
+         boolean sameLine = (x-2 <= mario.getX()) && (mario.getX() <= x+2) && (y == mario.getY());
+         boolean sameRow = (y-2 <= mario.getX()) && (mario.getX() <= y+2) && (x == mario.getX());
+
+         if (sameLine || sameRow){
+
+
+             // chekcs if wall is stopping the bomb on the top and the bottom of the player
+
+             // TODO: seperate the following into left and right cases with wall
+             if (map[x+1][y] == 'W' || map[x+1][y] == 'B' || map[x-1][y] == 'W' || map[x-1][y] == 'B') {
+                 hasWallNearBy = true;
+                 // then check if player is within the bomb's horizontal explosion range
+                 if (y-2 <= mario.getY() && mario.getY() <= y+2 && x == mario.getX()) {
+                     lives--;
+                     resetLevel();
+                     return;
+                 }
+             }
+
+             if (map[x][y+1] == 'W' || map[x][y+1] == 'B' || map[x][y-1] == 'W' || map[x][y-1] == 'B') {
+                 hasWallNearBy = true;
+                 if (x-2 <= mario.getY() && mario.getY() <= x+2 && y == mario.getY()) {
+                     lives--;
+                     resetLevel();
+                     return;
+                 }
+             }
+             else if (!hasWallNearBy) {
+                 lives--;
+                 resetLevel();
+                 return;
+             }
          }
 
          // kill enemies if they are caught in the explosion
          for (Enemy enemy : enemyList) {
-             if (x-2 <= enemy.getX() && enemy.getX() <= x+2 && y-2 <= enemy.getY() && enemy.getY() <= y+2) {
-                 enemy.setKilled(true);
+             hasWallNearBy = false;
+             sameLine = (x-2 <= enemy.getX()) && (enemy.getX() <= x+2) && (y == enemy.getY());
+             sameRow = (y-2 <= enemy.getX()) && (enemy.getX() <= y+2) && (x == enemy.getX());
+
+             if (sameLine || sameRow) {
+                 // reset x & y to the correct, original ones
+                 x = explosion.getX();
+                 y = explosion.getY();
+
+                 // chekcs if wall is stopping the bomb on the left and the right of the enemy
+                 if (map[x + 1][y] == 'W' || map[x + 1][y] == 'B' || map[x - 1][y] == 'W' || map[x - 1][y] == 'B') {
+                     hasWallNearBy = true;
+                     // then check if enemy is within the bomb's horizontal explosion range
+                     if (y - 2 <= enemy.getY() && enemy.getY() <= y + 2 && x == enemy.getX()) {
+                         enemy.setKilled(true);
+                     }
+                 }
+
+                 if (map[x][y + 1] == 'W' || map[x][y + 1] == 'B' || map[x][y - 1] == 'W' || map[x][y - 1] == 'B') {
+                     hasWallNearBy = true;
+                     if (x - 2 <= enemy.getY() && enemy.getY() <= x + 2 && y == enemy.getY()) {
+                         enemy.setKilled(true);
+                     }
+                 } else if (!hasWallNearBy) {
+                     enemy.setKilled(true);
+                 }
              }
          }
+         // remove enemy from enemy list if enemy has been killed
+         // not using simplified expression because this is easier to understand
          enemyList.removeIf(enemy -> enemy.isKilled());
 
          // update the map remove broken tiles caught in the explosion
@@ -200,45 +315,6 @@
          explosions.add(explosion);
     }
 
-     private void initCharacters(String[] map) {
-        for (int i = 0; i < map.length; i++) {
-            String[] rowArr = map[i].split("");
-            for (int j = 0; j < rowArr.length; j++) {
-                switch (rowArr[j]) {
-                    case "P":
-                        mario = new Player(j, i + 2, pApplet);
-                        break;
-                    case "R":
-                        enemyList.add(new RedEnemy(j, i + 2, pApplet));
-                        break;
-                    case "Y":
-                        enemyList.add(new YellowEnemy(j, i + 2, pApplet));
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-    }
-
-     private void checkEnemyCollision() {
-         // check collision
-         for (Enemy enemy : enemyList) {
-             if (mario.x == enemy.x && mario.y == enemy.y) {
-                 lives --;
-                 resetLevel();
-                 return;
-             }
-         }
-     }
-
-     private void resetLevel() {
-         Level level = pApplet.getAppConfig().getLevels().get(this.levelNumber);
-         this.map = initLevelMap(level, pApplet);
-         //reset time if needed
-         this.time = level.getTime();
-     }
-
      public void goToNextLevel() {
          if (pApplet.getAppConfig().getLevels().size() > this.levelNumber + 1) {
              this.levelNumber++;
@@ -258,22 +334,8 @@
          }
      }
 
-     private void decreaseTime() {
-         time--;
-     }
-
-     private void moveEnemies() {
-        enemyList.forEach(enemy -> enemy.move(map));
-     }
-
-     public void movePlayer(Direction direction) {
-         mario.move(map, direction);
-     }
-
-     public void placeBomb() {
-         Bomb bomb = new Bomb(mario.getX(), mario.getY(), pApplet);
-         this.bombs.add(bomb);
-     }
  }
+
+
 
 

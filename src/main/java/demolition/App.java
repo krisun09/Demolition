@@ -17,6 +17,10 @@ public class App extends PApplet {
         size(WIDTH, HEIGHT);
     }
 
+
+    /**
+     * sets up frameRate, reads map.txt, create a new gameMap object and call draw map method.
+     */
     public void setup() {
         frameRate(FPS);
         appConfig = new AppConfig("config.json", this);
@@ -57,6 +61,9 @@ public class App extends PApplet {
         }
     }
 
+    /**
+     * @return gameMap
+     */
     public GameMap getGameMap() {
         return gameMap;
     }
