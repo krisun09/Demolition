@@ -203,71 +203,51 @@
          int y = explosion.getY();
 
          // loose life and reset if player caught in explosion
-         boolean hasWallNearBy = false;
-         boolean sameLine = (x-2 <= mario.getX()) && (mario.getX() <= x+2) && (y == mario.getY());
-         boolean sameRow = (y-2 <= mario.getX()) && (mario.getX() <= y+2) && (x == mario.getX());
+         int topRange = 2;
+         int bottomRange = 2;
+         int leftRange = 2;
+         int rightRange = 2;
 
-         if (sameLine || sameRow){
+         if (map[y+1][x] == 'W' || map[y+1][x] == 'B') { bottomRange = 0;}
+         if (map[y-1][x] == 'W' || map[y-1][x] == 'B') { topRange = 0;}
+         if (map[y][x+1] == 'W' || map[y][x+1] == 'B') { rightRange = 0;}
+         if (map[y][x-1] == 'W' || map[y][x-1] == 'B') { leftRange = 0;}
 
-
-             // chekcs if wall is stopping the bomb on the top and the bottom of the player
-
-             // TODO: seperate the following into left and right cases with wall
-             if (map[x+1][y] == 'W' || map[x+1][y] == 'B' || map[x-1][y] == 'W' || map[x-1][y] == 'B') {
-                 hasWallNearBy = true;
-                 // then check if player is within the bomb's horizontal explosion range
-                 if (y-2 <= mario.getY() && mario.getY() <= y+2 && x == mario.getX()) {
-                     lives--;
-                     resetLevel();
-                     return;
-                 }
-             }
-
-             if (map[x][y+1] == 'W' || map[x][y+1] == 'B' || map[x][y-1] == 'W' || map[x][y-1] == 'B') {
-                 hasWallNearBy = true;
-                 if (x-2 <= mario.getY() && mario.getY() <= x+2 && y == mario.getY()) {
-                     lives--;
-                     resetLevel();
-                     return;
-                 }
-             }
-             else if (!hasWallNearBy) {
-                 lives--;
-                 resetLevel();
-                 return;
-             }
+         if ((x - leftRange <= mario.getX() && mario.getX() <= x + rightRange) && mario.getY() == y) {
+             lives--;
+             resetLevel();
+             return;
          }
+
+         if ((y - bottomRange <= mario.getY() && mario.getY() <= y + topRange) && mario.getX() == x) {
+             lives--;
+             resetLevel();
+             return;
+         }
+
 
          // kill enemies if they are caught in the explosion
          for (Enemy enemy : enemyList) {
-             hasWallNearBy = false;
-             sameLine = (x-2 <= enemy.getX()) && (enemy.getX() <= x+2) && (y == enemy.getY());
-             sameRow = (y-2 <= enemy.getX()) && (enemy.getX() <= y+2) && (x == enemy.getX());
 
-             if (sameLine || sameRow) {
-                 // reset x & y to the correct, original ones
-                 x = explosion.getX();
-                 y = explosion.getY();
+             topRange = 2;
+             bottomRange = 2;
+             leftRange = 2;
+             rightRange = 2;
 
-                 // chekcs if wall is stopping the bomb on the left and the right of the enemy
-                 if (map[x + 1][y] == 'W' || map[x + 1][y] == 'B' || map[x - 1][y] == 'W' || map[x - 1][y] == 'B') {
-                     hasWallNearBy = true;
-                     // then check if enemy is within the bomb's horizontal explosion range
-                     if (y - 2 <= enemy.getY() && enemy.getY() <= y + 2 && x == enemy.getX()) {
-                         enemy.setKilled(true);
-                     }
-                 }
+             if (map[y+1][x] == 'W' || map[y+1][x] == 'B') { bottomRange = 0;}
+             if (map[y-1][x] == 'W' || map[y-1][x] == 'B') { topRange = 0;}
+             if (map[y][x+1] == 'W' || map[y][x+1] == 'B') { rightRange = 0;}
+             if (map[y][x-1] == 'W' || map[y][x-1] == 'B') { leftRange = 0;}
 
-                 if (map[x][y + 1] == 'W' || map[x][y + 1] == 'B' || map[x][y - 1] == 'W' || map[x][y - 1] == 'B') {
-                     hasWallNearBy = true;
-                     if (x - 2 <= enemy.getY() && enemy.getY() <= x + 2 && y == enemy.getY()) {
-                         enemy.setKilled(true);
-                     }
-                 } else if (!hasWallNearBy) {
-                     enemy.setKilled(true);
-                 }
+             if ((x - leftRange <= enemy.getX() || enemy.getX() <= x + rightRange) && enemy.getY() == y) {
+                 enemy.setKilled(true);
+             }
+
+             if ((y - bottomRange <= enemy.getY() || enemy.getY() <= y + topRange) && enemy.getX() == x) {
+                 enemy.setKilled(true);
              }
          }
+
          // remove enemy from enemy list if enemy has been killed
          // not using simplified expression because this is easier to understand
          enemyList.removeIf(enemy -> enemy.isKilled());
